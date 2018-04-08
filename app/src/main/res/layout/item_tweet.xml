@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+    
+    <android.support.constraint.ConstraintLayout
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tweetCardFullName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Leandro Ricardo"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tweetCardUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ljricardo1"
+            app:layout_constraintTop_toBottomOf="@id/tweetCardFullName" />
+
+        <TextView
+            android:id="@+id/tweetText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Um tweet de exemplo cujo o texto vai aparecer aqui"
+            android:textSize="24sp"
+            app:layout_constraintTop_toBottomOf="@id/tweetCardUsername" />
+
+        <TextView
+            android:id="@+id/tweetCardDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Tuesday, 3rd May"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tweetText" />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.v7.widget.CardView>
