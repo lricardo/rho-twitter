@@ -43,7 +43,7 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Status status = statusList.get(position);
+        Status status = statusList.get(holder.getAdapterPosition());
 
         TextView tweetText = holder.tweetText;
         TextView tweetUserFullName = holder.tweetUserFullName;
@@ -60,11 +60,6 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
     @Override
     public int getItemCount() {
         return statusList.size();
-    }
-
-    public void updateStatusList (List<Status> statusList) {
-        this.statusList = statusList;
-        notifyItemRangeChanged(0, statusList.size());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
