@@ -7,7 +7,7 @@ This application is a job technical challenge.
 ## Checklist
 
 * Get Twitter public feed using its streaming API (prefer data push over polling) ✅
-* Search for a word provided by the user. That should produce a flow of data big enough for our purposes.   
+* Search for a word provided by the user. That should produce a flow of data big enough for our purposes.  ✅
 * Once collected, the tweets will be included in a view. ✅ (needs optimizations)
 * Every tweet has a lifespan, meaning that after that time, they will have to be removed from the list.  
 * Make this lifespan easy to tune in code.  
