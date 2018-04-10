@@ -88,9 +88,16 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        // Tratar a query string
+        String[] trackQuery = query.split(" ");
+
+        // If we only could use a Java 8 Lambda Expresion...
+        for (String t: trackQuery) {
+            t = t.toLowerCase();
+        }
         currentStream = twitterStreamFactory.getInstance();
         currentStream.addListener(MainActivity.this);
-        currentStream.filter(query);
+        currentStream.filter(trackQuery);
 
         searchView.clearFocus();
         return true;
