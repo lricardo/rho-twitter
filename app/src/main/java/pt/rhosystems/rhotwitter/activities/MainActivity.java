@@ -19,6 +19,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+import pt.rhosystems.rhotwitter.ExpiringList;
 import pt.rhosystems.rhotwitter.R;
 import pt.rhosystems.rhotwitter.adapters.StatusAdapter;
 import twitter4j.StallWarning;
@@ -46,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements StatusListener {
         setSupportActionBar(toolbar);
 
         tweetListRecyclerView = (RecyclerView) findViewById(R.id.tweetList);
-        statusList = new ArrayList<>();
+        int expireTime = Integer.parseInt(getString(R.string.expire_time));
+        statusList = new ExpiringList<>(expireTime);
 
         statusAdapter = new StatusAdapter(this, statusList);
         tweetListRecyclerView.setAdapter(statusAdapter);
@@ -113,12 +115,13 @@ public class MainActivity extends AppCompatActivity implements StatusListener {
 
     @Override
     public void onStatus(final Status status) {
-        statusList.add(0, status);
+        Log.v("MainActivity", status.getText());
+        statusList.add(status);
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                statusAdapter.notifyItemInserted(0);
-                tweetListRecyclerView.smoothScrollToPosition(0);
+                statusAdapter.notifyDataSetChanged();
+                //tweetListRecyclerView.smoothScrollToPosition(0);
             }
         });
     }
