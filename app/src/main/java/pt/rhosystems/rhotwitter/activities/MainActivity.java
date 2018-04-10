@@ -1,10 +1,7 @@
 package pt.rhosystems.rhotwitter.activities;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,10 +13,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import pt.rhosystems.rhotwitter.ExpiringList;
+import pt.rhosystems.rhotwitter.utilities.ExpiringList;
 import pt.rhosystems.rhotwitter.R;
 import pt.rhosystems.rhotwitter.adapters.StatusAdapter;
 import twitter4j.StallWarning;
@@ -43,10 +39,10 @@ public class MainActivity extends AppCompatActivity implements StatusListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        tweetListRecyclerView = (RecyclerView) findViewById(R.id.tweetList);
+        tweetListRecyclerView = findViewById(R.id.tweetList);
         int expireTime = Integer.parseInt(getString(R.string.expire_time));
         statusList = new ExpiringList<>(expireTime);
 
@@ -64,13 +60,8 @@ public class MainActivity extends AppCompatActivity implements StatusListener {
         Configuration configuration = configurationBuilder.build();
 
         twitterStreamFactory = new TwitterStreamFactory(configuration);
-        //TwitterStream twitterStream = twitterStreamFactory.getInstance();
 
-        //twitterStream.addListener(this);
-        //twitterStream.filter("portugal");
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements StatusListener {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                tweetListRecyclerView.getRecycledViewPool().clear();
                 statusAdapter.notifyDataSetChanged();
-                //tweetListRecyclerView.smoothScrollToPosition(0);
             }
         });
     }
