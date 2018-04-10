@@ -4,9 +4,14 @@ import org.junit.Test;
 
 import pt.rhosystems.rhotwitter.utilities.ExpiringList;
 
-public class ExpiringListTest {
+public class ExpiringListTests {
+
+    /**
+     * Test the clearExpired functionality
+     * @throws InterruptedException
+     */
     @Test
-    public void testErase () throws InterruptedException {
+    public void testClearExpired() throws InterruptedException {
 
         ExpiringList<String> l = new ExpiringList<>(3000);
 

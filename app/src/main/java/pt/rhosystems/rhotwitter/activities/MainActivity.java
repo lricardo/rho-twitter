@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import java.util.List;
 
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
     /* Twitter4j Related Configurations */
 
     /**
-     * Build Twiiter4j base configuration and initializes the activity TwitterStreamFactory
+     * Build Twitter4j base configuration and initializes the activity TwitterStreamFactory
      * with the base authentication.
      */
     public void buildTwitterBaseConfiguration() {
