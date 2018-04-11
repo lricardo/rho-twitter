@@ -8,22 +8,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import pt.rhosystems.rhotwitter.R;
-import twitter4j.Status;
+import pt.rhosystems.rhotwitter.models.Tweet;
 
 public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder> {
 
     private Context context;
-    private List<Status> statusList;
+    private List<Tweet> tweetList;
 
-    public StatusAdapter(Context context, List<Status> statusList) {
+    public StatusAdapter(Context context, List<Tweet> tweetList) {
         this.context = context;
-        this.statusList = statusList;
+        this.tweetList = tweetList;
     }
 
     private Context getContext() {
@@ -43,23 +40,24 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Status status = statusList.get(holder.getAdapterPosition());
+        Tweet tweet = tweetList.get(holder.getAdapterPosition());
 
         TextView tweetText = holder.tweetText;
         TextView tweetUserFullName = holder.tweetUserFullName;
         TextView tweetUsername = holder.tweetUsername;
         TextView tweetDate = holder.tweetDate;
 
-        tweetText.setText(status.getText());
-        tweetUserFullName.setText(status.getUser().getName());
-        tweetUsername.setText(status.getUser().getScreenName());
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, ''yy h:mm a");
-        tweetDate.setText(sdf.format(status.getCreatedAt()));
+        tweetText.setText(tweet.getText());
+        tweetUserFullName.setText(tweet.getUser().getName());
+        tweetUsername.setText(tweet.getUser().getScreenName());
+        //SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, ''yy h:mm a");
+        //tweetDate.setText(sdf.format(tweet.getCreatedAt()));
+        tweetDate.setText(tweet.getCreatedAt());
     }
 
     @Override
     public int getItemCount() {
-        return statusList.size();
+        return tweetList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

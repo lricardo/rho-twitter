@@ -1,13 +1,11 @@
 package pt.rhosystems.rhotwitter.activities;
 
-import android.app.IntentService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,31 +18,36 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+
+import java.io.InputStreamReader;
 import java.util.List;
 
+import okhttp3.ResponseBody;
+import pt.rhosystems.rhotwitter.models.Tweet;
+import pt.rhosystems.rhotwitter.api.TwitterStreamingApiHelper;
 import pt.rhosystems.rhotwitter.utilities.ExpiringList;
 import pt.rhosystems.rhotwitter.R;
 import pt.rhosystems.rhotwitter.adapters.StatusAdapter;
-import twitter4j.StallWarning;
-import twitter4j.Status;
-import twitter4j.StatusDeletionNotice;
-import twitter4j.StatusListener;
-import twitter4j.TwitterStream;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import twitter4j.TwitterStreamFactory;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.ConfigurationBuilder;
 
-public class MainActivity extends AppCompatActivity implements StatusListener,
-        SearchView.OnQueryTextListener {
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private TwitterStreamFactory twitterStreamFactory;
-    private StatusAdapter statusAdapter;
-    private List<Status> statusList;
-    private RecyclerView tweetListRecyclerView;
-    private TwitterStream currentStream;
+    private StatusAdapter tweetAdapter;
+    private List<Tweet> tweetList;
+    private RecyclerView tweetRecyclerView;
     private SearchView searchView;
 
     private boolean isConnected = false;
+    private TwitterStreamingApiHelper apiHelper;
+    private Call<ResponseBody> currentCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,19 +56,98 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        tweetListRecyclerView = findViewById(R.id.tweetList);
+        tweetRecyclerView = findViewById(R.id.tweetList);
         int expireTime = Integer.parseInt(getString(R.string.expire_time));
-        statusList = new ExpiringList<>(expireTime);
+        tweetList = new ExpiringList<>(expireTime);
 
-        statusAdapter = new StatusAdapter(this, statusList);
-        tweetListRecyclerView.setAdapter(statusAdapter);
-        tweetListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        tweetAdapter = new StatusAdapter(this, tweetList);
+        tweetRecyclerView.setAdapter(tweetAdapter);
+        tweetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        buildTwitterBaseConfiguration();
+        apiHelper = new TwitterStreamingApiHelper(this);
+        //buildTwitterBaseConfiguration();
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkStatusReceiver, intentFilter);
+    }
+
+
+
+    /* UI Configuration Methods */
+
+    /**
+     * Configures the Menu, inflating the SearchView.
+     * @param menu he options menu in which you place your items.
+     * @return As super, the value must be true to be shown in the menu. It will not be shown
+     * otherwise.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_main, menu);
+
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(this);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Utility method from notifying the ReyclerView that new data has been inserted
+     * or deleted. This code runs on UI thread explicitaly, as result of being called in
+     * other thread, disabling the usage of the method notifyDataSetChanged() directly.
+     */
+    private void refreshLayout () {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // This instruction prevents errors in RecyclerView
+                // regarding the data-structure.
+                tweetRecyclerView.getRecycledViewPool().clear();
+                // Notify the adapter that the data has changed.
+                tweetAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    /** SearchView Callbacks for the text searching capabilities **/
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        if (isConnected && !query.isEmpty()) {
+
+            currentCall = apiHelper.api.track(query);
+
+            currentCall.enqueue(responseBodyCallback);
+            searchView.clearFocus();
+
+            Toast.makeText(
+                    this,
+                    R.string.toast_on_query_stream_starting,
+                    Toast.LENGTH_LONG)
+                    .show();
+        }
+        else {
+            Toast.makeText(
+                    this,
+                    R.string.toast_on_query_device_not_connected,
+                    Toast.LENGTH_SHORT)
+                    .show();
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        if (currentCall != null) {
+            currentCall.cancel();
+            Log.v("", "Call canceled.");
+        }
+
+        return false;
     }
 
     /* Network Status BroadCastReceiver */
@@ -91,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
                             activeNetwork.isConnectedOrConnecting();
 
                     if (isConnected) {
-                        Log.v("NetworkStatusReceiver", "Device is connected.");
+                        Log.v("networkStatusReceiver", "Device is connected.");
                         isConnected = true;
                         Toast.makeText(
                                 getApplicationContext(),
@@ -100,140 +182,72 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
                                 .show();
                     }
                     else {
-                        Log.v("NetworkStatusReceiver", "Device is not Connected");
+                        Log.v("networkStatusReceiver", "Device is not Connected");
                         isConnected = false;
                         Toast.makeText(
                                 getApplicationContext(),
                                 R.string.toast_network_device_not_connected,
                                 Toast.LENGTH_LONG)
                                 .show();
-                        if (currentStream != null) {
-                            currentStream.shutdown();
+
+                        if (currentCall != null) {
+                            currentCall.cancel();
                         }
                     }
                 }
                 else {
-                    Log.e("NetworkStatusReceiver", "Unknown error.");
+                    Log.e("networkStatusReceiver", "Unknown error.");
                 }
             }
 
         }
     };
 
-    /* Twitter4j Related Configurations */
+    /* Data Streaming */
 
     /**
-     * Build Twitter4j base configuration and initializes the activity TwitterStreamFactory
-     * with the base authentication.
+     * This object listens to the stream, under the onResponse callback.
+     * The InputStream is obtained from the response body and GSON is used for deserealizing
+     * the objects and converting them to tweets. This callback is called once, as result of a
+     * single request to the stream API which is kept open (see TwitterStreamingApiHelper timeout).
+     * The objects are hence added to the tweetList.
      */
-    public void buildTwitterBaseConfiguration() {
-        ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder
-                .setOAuthConsumerKey(getBaseContext().getString(R.string.consumer_key))
-                .setOAuthConsumerSecret(getBaseContext().getString(R.string.consumer_secret))
-                .setOAuthAccessToken(getBaseContext().getString(R.string.access_token))
-                .setOAuthAccessTokenSecret(getBaseContext().getString(R.string.access_token_secret));
+    private Callback<ResponseBody> responseBodyCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
 
-        Configuration configuration = configurationBuilder.build();
+            if (response.isSuccessful()) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JsonReader reader = new JsonReader(
+                                    new InputStreamReader(response.body().byteStream()));
+                            Gson gson = new GsonBuilder().create();
 
-        twitterStreamFactory = new TwitterStreamFactory(configuration);
-    }
+                            Tweet tweet = gson.fromJson(reader, Tweet.class);
 
-    /** OptionsMenu Configuration for the SearchButton **/
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_main, menu);
+                            while (tweet != null) {
+                                Log.v("responseBodyCallback", tweet.getText());
 
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-        searchView = (SearchView) searchItem.getActionView();
-        searchView.setOnQueryTextListener(this);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    /** SearchView Callbacks for the text searching capabilities **/
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        if (isConnected) {
-            currentStream = twitterStreamFactory.getInstance();
-            currentStream.addListener(MainActivity.this);
-            currentStream.filter(query);
-
-            searchView.clearFocus();
-
-            Toast.makeText(
-                    this,
-                    R.string.toast_on_query_stream_starting,
-                    Toast.LENGTH_LONG)
-                    .show();
-        }
-        else {
-            Toast.makeText(
-                    this,
-                    R.string.toast_on_query_device_not_connected,
-                    Toast.LENGTH_SHORT)
-                    .show();
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        if (currentStream != null && newText.isEmpty()) {
-            currentStream.shutdown();
-        }
-        return false;
-    }
-
-    /** Twitter4j Callbacks **/
-
-    @Override
-    public void onStatus(final Status status) {
-        Log.v("MainActivity.onStatus", status.getText());
-        statusList.add(status);
-
-        /*
-          This callback code runs on other thread. As such, if we want to control
-          objects that are part of the UI Thread we must explicitly run those two
-          instructions on the UI Thread.
-         */
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // This instruction prevents errors in RecyclerView
-                // regarding the data-structure.
-                tweetListRecyclerView.getRecycledViewPool().clear();
-                // Notify the adapter that the data has changed.
-                statusAdapter.notifyDataSetChanged();
+                                tweetList.add(tweet);
+                                refreshLayout();
+                                tweet = gson.fromJson(reader, Tweet.class);
+                            }
+                        }
+                        catch (JsonSyntaxException e) {
+                            Log.v("responseBodyCallback","Stopped streaming.");
+                        }
+                    }
+                }).start();
             }
-        });
-    }
 
-    @Override
-    public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+        }
 
-    }
-
-    @Override
-    public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
-
-    }
-
-    @Override
-    public void onScrubGeo(long userId, long upToStatusId) {
-
-    }
-
-    @Override
-    public void onStallWarning(StallWarning warning) {
-
-    }
-
-    @Override
-    public void onException(Exception ex) {
-
-    }
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.e("responseBodyCallback", "Response failure.");
+        }
+    };
 
 }

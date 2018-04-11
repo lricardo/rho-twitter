@@ -1,28 +1,31 @@
 package pt.rhosystems.rhotwitter.api;
 
+import android.content.Context;
+
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import pt.rhosystems.rhotwitter.R;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import se.akerfeldt.okhttp.signpost.OkHttpOAuthConsumer;
 import se.akerfeldt.okhttp.signpost.SigningInterceptor;
 
-public class TwitterApiHelper {
+public class TwitterStreamingApiHelper {
 
     public final TwitterStreamingApi api;
 
-    private TwitterApiHelper () {
+    public TwitterStreamingApiHelper(Context context) {
         String url = "https://stream.twitter.com/1.1/";
 
         OkHttpOAuthConsumer consumer = new OkHttpOAuthConsumer(
-                "fnAknsxnKvRCAqDsetBHJyIF2",
-                "GPYgsmYbarWiLITb0f9Q8jYad2nPvTDv1Xazyf8CTsYA6qr5V4"
+                context.getString(R.string.consumer_key),
+                context.getString(R.string.consumer_secret)
         );
 
         consumer.setTokenWithSecret(
-                "701711139604975616-v35PzBSGTtxqOZNiRvU6wShfhwIvpYS",
-                "0Bu6WPpCLe4I4c27iIYrfWAQ836JFHyqjZwP3jc5colEU"
+                context.getString(R.string.access_token),
+                context.getString(R.string.access_token_secret)
         );
 
         OkHttpClient client = new OkHttpClient.Builder()
