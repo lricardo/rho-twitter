@@ -24,8 +24,6 @@ There are multiple ways of consuming the Twitter Streaming API. Some, are the fo
 * Using Retrofit + signpost
 * Using HttpURLConnection and implement the OAuth1a authentication workflow
 
-My first choice was using Retrofit + signpost, but I had a little difficulty on understanding how to do it and I ended loosing more time than needed on that. As such, I decided to use Twitter4j,  because I wanted to focus on the application development itself (and not on the authentication workflow).
+My first choice was using Retrofit + signpost, but I had a little difficulty in understanding how to do it and I ended losing more time than needed on that. As such, I decided to use Twitter4j, because I wanted to focus on the application development itself (and not on the authentication workflow). Also, Twitter4j is very complete, Android compatible, and multi-thread enabled (it uses OkHttp in its implementation).
 
-In the end I felt a little like I cheated, as consuming the API is an important part. So, in the branch `retrofit_impl` I'm planning to rebuild the data fetch part of the application with retrofit and signpost.
-
-
+In the end, I felt a little like I cheated, as consuming the API is an important part. So, in the branch `retrofit_impl` I'm planning to rebuild the data fetch part of the application with retrofit and signpost (which I have already working but needs the obvious integration).
