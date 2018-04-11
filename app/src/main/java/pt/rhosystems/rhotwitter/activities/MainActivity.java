@@ -1,5 +1,13 @@
 package pt.rhosystems.rhotwitter.activities;
 
+import android.app.IntentService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -51,7 +60,40 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
         tweetListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         buildTwitterBaseConfiguration();
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkStatusReceiver, intentFilter);
     }
+
+    /* Network */
+    public BroadcastReceiver networkStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v("NetworkStatusReceiver", "Network state changed.");
+
+            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                ConnectivityManager cm = (ConnectivityManager)
+                        context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                if (cm != null) {
+                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+                    boolean isConnected = activeNetwork != null &&
+                            activeNetwork.isConnectedOrConnecting();
+
+                    if (isConnected) {
+                        Log.v("NetworkStatusReceiver", "Device is connected.");
+                    }
+                    else {
+                        Log.v("NetworkStatusReceiver", "Device is not Connected");
+                    }
+                }
+                else {
+                    Log.e("NetworkStatusReceiver", "Unknown error.");
+                }
+            }
+        }
+    };
 
     /* Twitter4j Related Configurations */
 
@@ -109,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
 
     @Override
     public void onStatus(final Status status) {
-        Log.v("MainActivity", status.getText());
+        Log.v("MainActivity.onStatus", status.getText());
         statusList.add(status);
         this.runOnUiThread(new Runnable() {
             @Override
