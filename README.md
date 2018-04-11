@@ -14,6 +14,19 @@ This application is a job technical challenge.
 * If the connection is interrupted or the app is run offline, the tweets that  were alive during the previous execution will be shown until a connection  is established.   ✅
 * Use stock framework UI elements.   ✅
 
+## To deploy this application
+
+Make sure you have a file called secrets.xml with your Twitter Application Credentials:
+
+```bash
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="consumer_key">XXXXX</string>
+    <string name="consumer_secret"XXXXX></string>
+    <string name="access_token">XXXXX</string>
+    <string name="access_token_secret">XXXXX</string>
+</resources>
+```
 ## Libraries
 
 ### Twitter4j
