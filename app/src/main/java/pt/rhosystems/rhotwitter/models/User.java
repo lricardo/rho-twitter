@@ -5,10 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class User {
     private static final long serialVersionUID = 1L;
 
-    @SerializedName("name")
     private String name;
-
-    @SerializedName("screen_name")
     private String screenName;
 
     public User(String name, String screenName) {

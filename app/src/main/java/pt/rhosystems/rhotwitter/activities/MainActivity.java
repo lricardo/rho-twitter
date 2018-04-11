@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
@@ -29,6 +30,7 @@ import java.util.List;
 import okhttp3.ResponseBody;
 import pt.rhosystems.rhotwitter.models.Tweet;
 import pt.rhosystems.rhotwitter.api.TwitterStreamingApiHelper;
+import pt.rhosystems.rhotwitter.models.User;
 import pt.rhosystems.rhotwitter.utilities.ExpiringList;
 import pt.rhosystems.rhotwitter.R;
 import pt.rhosystems.rhotwitter.adapters.TweetAdapter;
@@ -225,13 +227,41 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                         new InputStreamReader(response.body().byteStream()));
                                 Gson gson = new GsonBuilder().create();
 
-                                Tweet tweet = gson.fromJson(reader, Tweet.class);
+                                JsonObject j = gson.fromJson(reader, JsonObject.class);
+                                User user = new User(
+                                        j.getAsJsonObject("user").get("name").getAsString(),
+                                        j.getAsJsonObject("user").get("screen_name").getAsString()
+                                );
+                                Tweet tweet = new Tweet(
+                                        j.get("created_at").getAsString(),
+                                        j.get("id_str").getAsString(),
+                                        j.get("text").getAsString(),
+                                        user
+                                );
 
                                 while (tweet != null) {
                                     if (tweet.getText() != null) {
-                                        Log.v("responseBodyCallback", tweet.getText());
-                                        tweet = gson.fromJson(reader, Tweet.class);
                                         tweetList.add(tweet);
+
+                                        Log.v("responseBodyCallback", tweet.getText());
+                                        j = gson.fromJson(reader, JsonObject.class);
+
+                                        if (j.getAsJsonObject("user") != null) {
+                                            user = new User(
+                                                    j.getAsJsonObject("user").get("name").getAsString(),
+                                                    j.getAsJsonObject("user").get("screen_name").getAsString()
+                                            );
+                                            tweet = new Tweet(
+                                                    j.get("created_at").getAsString(),
+                                                    j.get("id_str").getAsString(),
+                                                    j.get("text").getAsString(),
+                                                    user
+                                            );
+                                        }
+                                        else {
+                                            Log.v("", "Received track notice...");
+                                        }
+
                                         refreshLayout();
                                     } else {
                                         Log.v("responseBodyCallback", "Waiting for messages...");
