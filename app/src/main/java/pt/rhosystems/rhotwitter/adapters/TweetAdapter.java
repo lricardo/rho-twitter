@@ -10,6 +10,10 @@ import android.widget.TextView;
 
 import com.google.gson.JsonObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import pt.rhosystems.rhotwitter.R;
@@ -52,11 +56,27 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         tweetText.setText(tweet.getText());
         tweetUserFullName.setText(tweet.getUser().getName());
         tweetUsername.setText(tweet.getUser().getScreenName());
-        //SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, ''yy h:mm a");
-        //tweetDate.setText(sdf.format(tweet.getCreatedAt()));
-        tweetDate.setText(tweet.getCreatedAt());
-    }
 
+        tweetDate.setText(transformDate(tweet.getCreatedAt()));
+    }
+    private String transformDate(String stringDate) {
+        // Parse the current format
+        DateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy");
+
+        // Create a date
+        Date date = null;
+
+        try {
+            date = format.parse(stringDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // New format
+        format = new SimpleDateFormat("EEE, MMM d ''yy    h:mm a");
+
+        return format.format(date);
+    }
     @Override
     public int getItemCount() {
         return tweetList.size();

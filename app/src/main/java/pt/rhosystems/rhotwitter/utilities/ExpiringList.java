@@ -22,7 +22,7 @@ public class ExpiringList<K> implements List<K> {
 
     /**
      * Main constructor.
-     * @param expirationTime Expiration time, in miliseconds.
+     * @param expirationTime Expiration time, in milliseconds.
      */
     public ExpiringList(long expirationTime) {
         this.expirationTime = expirationTime;
