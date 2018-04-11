@@ -2,4 +2,10 @@
     <string name="app_name">RhoTwitter</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
+
+    <string name="toast_network_device_connected">Device is connected</string>
+    <string name="toast_network_device_not_connected">Device is not connected</string>
+    <string name="toast_network_unknown_error">Unknown Error</string>
+    <string name="toast_on_query_device_not_connected">Device is not connected. Please, check your connection and try again.</string>
+    <string name="toast_on_query_stream_starting">Stream starting...</string>
 </resources>

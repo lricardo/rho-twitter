@@ -93,14 +93,20 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
                     if (isConnected) {
                         Log.v("NetworkStatusReceiver", "Device is connected.");
                         isConnected = true;
-                        Toast.makeText(getApplicationContext(), "Start searching for streaming!"
-                                , Toast.LENGTH_LONG).show();
+                        Toast.makeText(
+                                getApplicationContext(),
+                                R.string.toast_network_device_connected
+                                , Toast.LENGTH_LONG)
+                                .show();
                     }
                     else {
                         Log.v("NetworkStatusReceiver", "Device is not Connected");
                         isConnected = false;
-                        Toast.makeText(getApplicationContext(), "The device is not connected",
-                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(
+                                getApplicationContext(),
+                                R.string.toast_network_device_not_connected,
+                                Toast.LENGTH_LONG)
+                                .show();
                         if (currentStream != null) {
                             currentStream.shutdown();
                         }
@@ -155,11 +161,17 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
             currentStream.filter(query);
 
             searchView.clearFocus();
+
+            Toast.makeText(
+                    this,
+                    R.string.toast_on_query_stream_starting,
+                    Toast.LENGTH_LONG)
+                    .show();
         }
         else {
             Toast.makeText(
                     this,
-                    "Device is not connected. Please, check your connection and try again.",
+                    R.string.toast_on_query_device_not_connected,
                     Toast.LENGTH_SHORT)
                     .show();
         }
@@ -181,10 +193,19 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
     public void onStatus(final Status status) {
         Log.v("MainActivity.onStatus", status.getText());
         statusList.add(status);
+
+        /*
+          This callback code runs on other thread. As such, if we want to control
+          objects that are part of the UI Thread we must explicitly run those two
+          instructions on the UI Thread.
+         */
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                // This instruction prevents errors in RecyclerView
+                // regarding the data-structure.
                 tweetListRecyclerView.getRecycledViewPool().clear();
+                // Notify the adapter that the data has changed.
                 statusAdapter.notifyDataSetChanged();
             }
         });
