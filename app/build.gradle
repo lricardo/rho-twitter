@@ -33,5 +33,14 @@ dependencies {
     implementation 'com.android.support:cardview-v7:27.0.+'
     implementation 'com.android.support:recyclerview-v7:27.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+
+    implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'oauth.signpost:signpost-core:1.2.1.2'
+
     testCompile 'junit:junit:4.12'
 }
