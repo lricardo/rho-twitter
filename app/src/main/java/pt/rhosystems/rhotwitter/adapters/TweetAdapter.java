@@ -8,17 +8,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.JsonObject;
+
 import java.util.List;
 
 import pt.rhosystems.rhotwitter.R;
 import pt.rhosystems.rhotwitter.models.Tweet;
 
-public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder> {
+public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
     private Context context;
     private List<Tweet> tweetList;
 
-    public StatusAdapter(Context context, List<Tweet> tweetList) {
+    public TweetAdapter(Context context, List<Tweet> tweetList) {
         this.context = context;
         this.tweetList = tweetList;
     }

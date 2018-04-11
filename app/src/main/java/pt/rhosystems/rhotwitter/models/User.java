@@ -1,14 +1,19 @@
 package pt.rhosystems.rhotwitter.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class User {
     private static final long serialVersionUID = 1L;
 
+    @SerializedName("name")
     private String name;
-    private String screen_name;
 
-    public User(String name, String screen_name) {
+    @SerializedName("screen_name")
+    private String screenName;
+
+    public User(String name, String screenName) {
         this.name = name;
-        this.screen_name = screen_name;
+        this.screenName = screenName;
     }
 
     public String getName() {
@@ -16,6 +21,6 @@ public class User {
     }
 
     public String getScreenName() {
-        return screen_name;
+        return screenName;
     }
 }

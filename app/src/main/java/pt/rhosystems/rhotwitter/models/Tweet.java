@@ -1,28 +1,37 @@
 package pt.rhosystems.rhotwitter.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
-public class Tweet implements Serializable {
+public class Tweet {
     private static final long serialVersionUID = 1L;
 
-    private String created_at;
-    private String id_str;
+    @SerializedName("created_at")
+    private String createdAt;
+
+    @SerializedName("id_str")
+    private String idStr;
+
+    @SerializedName("text")
     private String text;
+
+    @SerializedName("user")
     private User user;
 
-    public Tweet(String created_at, String id_str, String text, User user) {
-        this.created_at = created_at;
-        this.id_str = id_str;
+    public Tweet(String createdAt, String idStr, String text, User user) {
+        this.createdAt = createdAt;
+        this.idStr = idStr;
         this.text = text;
         this.user = user;
     }
 
     public String getCreatedAt() {
-        return created_at;
+        return createdAt;
     }
 
     public String getIdStr() {
-        return id_str;
+        return idStr;
     }
 
     public String getText() {

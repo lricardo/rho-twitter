@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,7 +31,7 @@ import pt.rhosystems.rhotwitter.models.Tweet;
 import pt.rhosystems.rhotwitter.api.TwitterStreamingApiHelper;
 import pt.rhosystems.rhotwitter.utilities.ExpiringList;
 import pt.rhosystems.rhotwitter.R;
-import pt.rhosystems.rhotwitter.adapters.StatusAdapter;
+import pt.rhosystems.rhotwitter.adapters.TweetAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,7 +40,7 @@ import twitter4j.TwitterStreamFactory;
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private TwitterStreamFactory twitterStreamFactory;
-    private StatusAdapter tweetAdapter;
+    private TweetAdapter tweetAdapter;
     private List<Tweet> tweetList;
     private RecyclerView tweetRecyclerView;
     private SearchView searchView;
@@ -61,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         int expireTime = Integer.parseInt(getString(R.string.expire_time));
         tweetList = new ExpiringList<>(expireTime);
 
-        tweetAdapter = new StatusAdapter(this, tweetList);
+        tweetAdapter = new TweetAdapter(this, tweetList);
         tweetRecyclerView.setAdapter(tweetAdapter);
         tweetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -216,34 +215,34 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private Callback<ResponseBody> responseBodyCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
-            Log.v("------", "Response");
-            if (response.isSuccessful()) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            JsonReader reader = new JsonReader(
-                                    new InputStreamReader(response.body().byteStream()));
-                            Gson gson = new GsonBuilder().create();
+                Log.v("------", "Response");
+                if (response.isSuccessful()) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                JsonReader reader = new JsonReader(
+                                        new InputStreamReader(response.body().byteStream()));
+                                Gson gson = new GsonBuilder().create();
 
-                            Tweet tweet = gson.fromJson(reader, Tweet.class);
+                                Tweet tweet = gson.fromJson(reader, Tweet.class);
 
-                            while (tweet != null) {
-                                if (tweet.getText() != null) {
-                                    Log.v("responseBodyCallback", tweet.getText());
-                                    tweet = gson.fromJson(reader, Tweet.class);
-                                    tweetList.add(tweet);
-                                    refreshLayout();
-                                } else {
-                                    Log.v("responseBodyCallback", "Waiting for messages...");
+                                while (tweet != null) {
+                                    if (tweet.getText() != null) {
+                                        Log.v("responseBodyCallback", tweet.getText());
+                                        tweet = gson.fromJson(reader, Tweet.class);
+                                        tweetList.add(tweet);
+                                        refreshLayout();
+                                    } else {
+                                        Log.v("responseBodyCallback", "Waiting for messages...");
+                                    }
                                 }
+                            } catch (JsonSyntaxException e) {
+                                Log.v("responseBodyCallback", "Stopped streaming.");
                             }
-                        } catch (JsonSyntaxException e) {
-                            Log.v("responseBodyCallback", "Stopped streaming.");
                         }
-                    }
-                }).start();
-            }
+                    }).start();
+                }
 
         }
 
