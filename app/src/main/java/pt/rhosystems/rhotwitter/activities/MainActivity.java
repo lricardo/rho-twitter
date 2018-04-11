@@ -71,7 +71,21 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         registerReceiver(networkStatusReceiver, intentFilter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        // Register the action again
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkStatusReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkStatusReceiver);
+    }
 
     /* UI Configuration Methods */
 
