@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
     private TwitterStream currentStream;
     private SearchView searchView;
 
+    private boolean isConnected = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,8 +68,15 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
         registerReceiver(networkStatusReceiver, intentFilter);
     }
 
-    /* Network */
-    public BroadcastReceiver networkStatusReceiver = new BroadcastReceiver() {
+    /* Network Status BroadCastReceiver */
+
+    /**
+     * This object listens to network changes.
+     * I could have implemented a ConnectionLifeCycleListener (a callback for TwitterStream object),
+     * but I think that it is too much abstraction (and I plan to implement my own interaction with
+     * the service).
+     */
+    private BroadcastReceiver networkStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.v("NetworkStatusReceiver", "Network state changed.");
@@ -78,20 +87,30 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
                 if (cm != null) {
                     NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
-                    boolean isConnected = activeNetwork != null &&
+                    isConnected = activeNetwork != null &&
                             activeNetwork.isConnectedOrConnecting();
 
                     if (isConnected) {
                         Log.v("NetworkStatusReceiver", "Device is connected.");
+                        isConnected = true;
+                        Toast.makeText(getApplicationContext(), "Start searching for streaming!"
+                                , Toast.LENGTH_LONG).show();
                     }
                     else {
                         Log.v("NetworkStatusReceiver", "Device is not Connected");
+                        isConnected = false;
+                        Toast.makeText(getApplicationContext(), "The device is not connected",
+                                Toast.LENGTH_LONG).show();
+                        if (currentStream != null) {
+                            currentStream.shutdown();
+                        }
                     }
                 }
                 else {
                     Log.e("NetworkStatusReceiver", "Unknown error.");
                 }
             }
+
         }
     };
 
@@ -130,18 +149,27 @@ public class MainActivity extends AppCompatActivity implements StatusListener,
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        if (isConnected) {
+            currentStream = twitterStreamFactory.getInstance();
+            currentStream.addListener(MainActivity.this);
+            currentStream.filter(query);
 
-        currentStream = twitterStreamFactory.getInstance();
-        currentStream.addListener(MainActivity.this);
-        currentStream.filter(query);
+            searchView.clearFocus();
+        }
+        else {
+            Toast.makeText(
+                    this,
+                    "Device is not connected. Please, check your connection and try again.",
+                    Toast.LENGTH_SHORT)
+                    .show();
+        }
 
-        searchView.clearFocus();
         return true;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        if (newText.isEmpty() && currentStream != null) {
+        if (currentStream != null && newText.isEmpty()) {
             currentStream.shutdown();
         }
         return false;
