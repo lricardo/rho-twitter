@@ -29,14 +29,15 @@ Make sure you have a file called secrets.xml with your Twitter Application Crede
 ```
 ## Libraries
 
-### Twitter4j
+* **GSON** is a utility for serializing and unserializing JSON objects. It is awesome.
+* **Retrofit2** is a high-level REST abstraction on top of HTTP for interacting with APIs. It may use OkHttp as HTTP client backend.
+* **signpost** is a utility for OkHttp which is the facilitates the  signing HTTP messages on the Java platform in conformance with the OAuth Core 1.0a standard. 
+* **OkHTTP** is an HTTP Client. Retrofit needs to perform HTTP operations.
 
-There are multiple ways of consuming the Twitter Streaming API. Some, are the following:
-
-* Using twitter4j (the easier)
-* Using Retrofit + signpost
-* Using HttpURLConnection and implement the OAuth1a authentication workflow
+## In this repository
+* Master: Twitter4j Implementation
+* retrofit_impl: Retrofit-based implementation
 
 My first choice was using Retrofit + signpost, but I had a little difficulty in understanding how to do it and I ended losing more time than needed on that. As such, I decided to use Twitter4j, because I wanted to focus on the application development itself (and not on the authentication workflow). Also, Twitter4j is very complete, Android compatible, and multi-thread enabled (it uses OkHttp in its implementation).
 
-In the end, I felt a little like I cheated, as consuming the API is an important part. So, in the branch `retrofit_impl` I'm planning to rebuild the data fetch part of the application with retrofit and signpost (which I have already working but needs the obvious integration).
+In the end, I felt a little like I cheated, as consuming the API is an important part. So, in the branch `retrofit_impl` I had rebuilt the data fetch part of the application with retrofit and signpost.

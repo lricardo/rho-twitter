@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                 Gson gson = new GsonBuilder().create();
 
                                 JsonObject j = gson.fromJson(reader, JsonObject.class);
+
                                 User user = new User(
                                         j.getAsJsonObject("user").get("name").getAsString(),
                                         j.getAsJsonObject("user").get("screen_name").getAsString()
