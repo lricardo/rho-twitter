@@ -1,6 +1,8 @@
 package pt.rhosystems.rhotwitter.models;
 
 public class User {
+    private static final long serialVersionUID = 1L;
+
     private String name;
     private String screen_name;
 

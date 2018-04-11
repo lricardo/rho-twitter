@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -215,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private Callback<ResponseBody> responseBodyCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
-
+            Log.v("------", "Response");
             if (response.isSuccessful()) {
                 new Thread(new Runnable() {
                     @Override
@@ -228,15 +229,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                             Tweet tweet = gson.fromJson(reader, Tweet.class);
 
                             while (tweet != null) {
-                                Log.v("responseBodyCallback", tweet.getText());
-
-                                tweetList.add(tweet);
-                                refreshLayout();
-                                tweet = gson.fromJson(reader, Tweet.class);
+                                if (tweet.getText() != null) {
+                                    Log.v("responseBodyCallback", tweet.getText());
+                                    tweet = gson.fromJson(reader, Tweet.class);
+                                    tweetList.add(tweet);
+                                    refreshLayout();
+                                } else {
+                                    Log.v("responseBodyCallback", "Waiting for messages...");
+                                }
                             }
-                        }
-                        catch (JsonSyntaxException e) {
-                            Log.v("responseBodyCallback","Stopped streaming.");
+                        } catch (JsonSyntaxException e) {
+                            Log.v("responseBodyCallback", "Stopped streaming.");
                         }
                     }
                 }).start();
