@@ -37,11 +37,9 @@ import pt.rhosystems.rhotwitter.adapters.TweetAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import twitter4j.TwitterStreamFactory;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    private TwitterStreamFactory twitterStreamFactory;
     private TweetAdapter tweetAdapter;
     private List<Tweet> tweetList;
     private RecyclerView tweetRecyclerView;
@@ -67,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         tweetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         apiHelper = new TwitterStreamingApiHelper(this);
-        //buildTwitterBaseConfiguration();
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -217,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private Callback<ResponseBody> responseBodyCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
-                Log.v("------", "Response");
+                Log.v("responseBodyCallback", "Response");
                 if (response.isSuccessful()) {
                     new Thread(new Runnable() {
                         @Override
@@ -227,6 +224,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                         new InputStreamReader(response.body().byteStream()));
                                 Gson gson = new GsonBuilder().create();
 
+                                /*
+                                Sometimes a track object is sent. As such, I couldn't use
+                                Tweet.class as reference for the conversion and had to make it
+                                manual.
+                                */
                                 JsonObject j = gson.fromJson(reader, JsonObject.class);
 
                                 User user = new User(
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                         user
                                 );
 
-                                while (tweet != null) {
+                                while (true) {
                                     if (tweet.getText() != null) {
                                         tweetList.add(tweet);
 
