@@ -238,25 +238,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                         new InputStreamReader(response.body().byteStream()));
                                 Gson gson = new GsonBuilder().create();
 
-                                /*
-                                Sometimes a track object is sent. As such, I couldn't use
-                                Tweet.class as reference for the conversion and had to make it
-                                manual.
-                                */
-                                JsonObject j = gson.fromJson(reader, JsonObject.class);
 
-                                User user = new User(
-                                        j.getAsJsonObject("user").get("name").getAsString(),
-                                        j.getAsJsonObject("user").get("screen_name").getAsString()
-                                );
-                                Tweet tweet = new Tweet(
-                                        j.get("created_at").getAsString(),
-                                        j.get("id_str").getAsString(),
-                                        j.get("text").getAsString(),
-                                        user
-                                );
+                                JsonObject j = gson.fromJson(reader, JsonObject.class);
+                                Tweet tweet = Tweet.fromJsonObject(j);
 
                                 while (true) {
+                                    // Several types of messages can be sent.
+                                    // Some are not Tweet objects.
+                                    // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object.html
                                     if (tweet.getText() != null) {
                                         tweetList.add(tweet);
 
@@ -264,16 +253,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                         j = gson.fromJson(reader, JsonObject.class);
 
                                         if (j.getAsJsonObject("user") != null) {
-                                            user = new User(
-                                                    j.getAsJsonObject("user").get("name").getAsString(),
-                                                    j.getAsJsonObject("user").get("screen_name").getAsString()
-                                            );
-                                            tweet = new Tweet(
-                                                    j.get("created_at").getAsString(),
-                                                    j.get("id_str").getAsString(),
-                                                    j.get("text").getAsString(),
-                                                    user
-                                            );
+                                            tweet = Tweet.fromJsonObject(j);
                                         }
                                         else {
                                             Log.v("", "Received track notice...");

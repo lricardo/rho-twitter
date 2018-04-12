@@ -1,5 +1,6 @@
 package pt.rhosystems.rhotwitter.models;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -33,6 +34,21 @@ public class Tweet {
 
     public User getUser() {
         return user;
+    }
+
+    public static Tweet fromJsonObject (JsonObject jsonObject) {
+        User user = new User(
+                jsonObject.getAsJsonObject("user").get("name").getAsString(),
+                jsonObject.getAsJsonObject("user").get("screen_name").getAsString()
+        );
+        Tweet tweet = new Tweet(
+                jsonObject.get("created_at").getAsString(),
+                jsonObject.get("id_str").getAsString(),
+                jsonObject.get("text").getAsString(),
+                user
+        );
+
+        return tweet;
     }
 }
 
